@@ -3,15 +3,16 @@ from typing import Any, Union
 
 MODE_UNKNOWN = "Unknown"
 
-_MODES = {
-    0: "Off",
+# The mode byte holds the active trigger in the low nibble and the motor
+# speed step in the high nibble, so the mode is decided by the trigger only.
+_TRIGGER_MODES = {
+    0: "Constant speed",
+    1: "Humidity",
+    2: "Light",
+    3: "Timer",
+    4: "VOC",
     6: "Pause",
-    16: "Constant speed",
-    34: "Light",
-    35: "Timer",
-    49: "Humidity",
-    84: "VOC",
-    103: "Boost",
+    7: "Boost",
 }
 
 class SkySensors:
@@ -54,10 +55,10 @@ class SkySensors:
         self.status = bool(self.flags)
 
         self.mode_raw = int(values[1])
-        if mode := _MODES.get(self.mode_raw):
-            self.mode = mode
+        if self.mode_raw == 0:
+            self.mode = "Off"
         else:
-            self.mode = MODE_UNKNOWN
+            self.mode = _TRIGGER_MODES.get(self.active_trigger, MODE_UNKNOWN)
 
         self.humidity_raw = values[2]
         self.voc_raw = values[3]
